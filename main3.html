@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hey, Are You Tin?</title>
+  <style>
+    @font-face {
+      font-family: 'Monocraft';
+      src: url('fonts/Monocraft.ttf') format('truetype');
+    }
+
+    body {
+      font-family: 'Monocraft', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      height: 100vh;
+      margin: 0;
+      background: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    h1, p, .buttons {
+      transition: opacity 0.5s;
+    }
+
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mission-container,
+    .no-message-container,
+    .options-container,
+    .time-date-container,
+    .input-container,
+    .mission-details-container {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .mission-container h1 {
+      font-size: 1.8em;
+    }
+
+    .mission-options,
+    .final-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      font-family: 'Monocraft', monospace;
+      color: white;
+      background: #4caf50;
+      border: 3px solid #2e7d32;
+      border-radius: 0;
+      cursor: pointer;
+      width: 220px;
+      text-transform: uppercase; /* Make the button text always uppercase */
+    }
+
+    button:hover {
+      background: #388e3c;
+    }
+
+    .accept-red {
+      color: red;
+      background: #4caf50;
+    }
+
+    .decline {
+      background: #f87171;
+      border: 3px solid #d32f2f;
+    }
+
+    .decline:hover {
+      background: #ef5350;
+    }
+
+    .rose {
+      position: absolute;
+      font-size: 2em;
+      animation: fall 3s linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Bomb emoji animation */
+    .bomb {
+      position: absolute;
+      font-size: 2em;
+      animation: bombShower 1s ease-out infinite;
+      opacity: 1;
+    }
+
+    @keyframes bombShower {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--x), var(--y));
+      }
+    }
+
+    /* Minecraft style for inputs and buttons */
+    .minecraft-style {
+      font-family: 'Monocraft', monospace;
+      background-color: #2e7d32;
+      color: white;
+      border: 3px solid #4caf50;
+      padding: 10px 15px;
+      font-size: 1.2em;
+      border-radius: 0;
+    }
+
+    .minecraft-style input {
+      width: 220px;
+      font-size: 1em;
+      padding: 10px;
+    }
+
+    .minecraft-style select {
+      font-size: 1.2em;
+      padding: 10px;
+      border: 3px solid #4caf50;
+      background-color: #2e7d32;
+      color: white;
+    }
+
+    .tip-options {
+      display: flex;
+      gap: 20px;
+    }
+
+    .tip-options button {
+      background-color: #4caf50;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .tip-options button:hover {
+      background-color: #388e3c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hey, are you Tin?</h1>
+    <div class="buttons">
+      <button onclick="handleYes()">Yes</button>
+      <button onclick="handleNo()">No</button>
+    </div>
+  </div>
+
+  <!-- Mission Screen -->
+  <div class="mission-container">
+    <h1>Your mission, if you choose to accept it, is to go undercover and date Jeremy</h1>
+    <div class="mission-options">
+      <button onclick="handleAccept()">I accept</button>
+      <button class="accept-red" onclick="handleAccept()">I accept but in red</button>
+      <button class="decline" onclick="handleDecline()">I decline</button>
+    </div>
+  </div>
+
+  <!-- Location Options -->
+  <div class="options-container">
+    <h1>Select your location:</h1>
+    <div class="final-options">
+      <button id="option1" onclick="handleLocationSelect('Ooma - no mid food all good')">Ooma - no mid food all good</button>
+      <button id="option2" onclick="handleLocationSelect('Kiwami - group of japanese restaurants all in one')">Kiwami - group of japanese restaurants all in one</button>
+      <button id="option3" onclick="handleLocationSelect('Genki Sushi - sushi galore')">Genki Sushi - sushi galore</button>
+      <button id="option4" onclick="handleLocationSelect('I want something else')">I want something else</button>
+    </div>
+  </div>
+
+  <!-- Custom Location Input -->
+  <div class="input-container minecraft-style">
+    <h1>Type your location:</h1>
+    <input type="text" id="customLocationInput" placeholder="Type your custom location" oninput="updateCustomLocation()">
+    <button onclick="submitCustomLocation()">Submit</button>
+  </div>
+
+  <!-- Time and Date Selection -->
+  <div class="time-date-container">
+    <h1>Select the time and date:</h1>
+    <div class="minecraft-style">
+      <input type="datetime-local" id="timeDateInput" />
+      <button onclick="submitTimeDate()">Submit</button>
+    </div>
+  </div>
+
+  <!-- Mission Details -->
+  <div class="mission-details-container">
+    <h1>Mission Details</h1>
+    <p id="locationSummary"></p>
+    <p id="timeSummary"></p>
+    <p id ="messageSummary"></p>
+    <h2>Would you like to tip?</h2>
+    <div class="tip-options">
+      <button onclick="selectTip(10)">10%</button>
+      <button onclick="selectTip(20)">20%</button>
+      <button onclick="selectTip(30)">30%</button>
+    </div>
+  </div>
+
+  <div class="no-message-container">
+    <h1>This is for Tin's eyes only.</h1>
+    <h1>Initiating self destruct</h1>
+  </div>
+
+  <script>
+    const container = document.querySelector('.container');
+    const missionContainer = document.querySelector('.mission-container');
+    const optionsContainer = document.querySelector('.options-container');
+    const inputContainer = document.querySelector('.input-container');
+    const timeDateContainer = document.querySelector('.time-date-container');
+    const missionDetailsContainer = document.querySelector('.mission-details-container');
+    const noMessageContainer = document.querySelector('.no-message-container');
+    const declineButton = document.querySelector('.decline');
+    const customLocationInput = document.getElementById('customLocationInput');
+    const timeDateInput = document.getElementById('timeDateInput');
+    const locationSummary = document.getElementById('locationSummary');
+    const timeSummary = document.getElementById('timeSummary');
+    const messageSummary = document.getElementById('messageSummary');
+
+    let selectedLocation = '';
+    let selectedTime = '';
+    let selectedTip = 0;
+
+    function handleYes() {
+      container.classList.add('hidden');
+      createRoses();
+      setTimeout(() => {
+        missionContainer.style.display = 'flex';
+      }, 3000);
+    }
+
+    function handleNo() {
+      container.classList.add('hidden');
+      noMessageContainer.style.display = 'flex';
+      setTimeout(() => {
+        createBombs();
+      }, 500);
+    }
+
+    function handleAccept() {
+      missionContainer.style.display = 'none';
+      optionsContainer.style.display = 'flex';
+    }
+
+    function handleDecline() {
+      const safeZoneSize = 300;
+      const buttonWidth = declineButton.offsetWidth;
+      const buttonHeight = declineButton.offsetHeight;
+      const maxX = safeZoneSize - buttonWidth;
+      const maxY = safeZoneSize - buttonHeight;
+      const randomX = Math.random() * maxX;
+      const randomY = Math.random() * maxY;
+      const centerX = (window.innerWidth - safeZoneSize) / 2;
+      const centerY = (window.innerHeight - safeZoneSize) / 2;
+      declineButton.style.position = 'absolute';
+      declineButton.style.left = `${centerX + randomX}px`;
+      declineButton.style.top = `${centerY + randomY}px`;
+    }
+
+    function handleLocationSelect(location) {
+      selectedLocation = location;
+      optionsContainer.style.display = 'none';
+      showTimeDateSelection();
+    }
+
+    function showCustomLocationInput() {
+      optionsContainer.style.display = 'none';
+      inputContainer.style.display = 'flex';
+    }
+
+    function updateCustomLocation() {
+      selectedLocation = customLocationInput.value;
+    }
+
+    function submitCustomLocation() {
+      inputContainer.style.display = 'none';
+      showTimeDateSelection();
+    }
+
+    function showTimeDateSelection() {
+      timeDateContainer.style.display = 'flex';
+    }
+
+    function submitTimeDate() {
+        selectedTime = new Date(timeDateInput.value);
+        
+        // Format the selected time to the desired human-readable format
+        const options = {
+          weekday: 'long', // Include the day of the week (e.g., Monday)
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true // For AM/PM format
+        };
+        const formattedTime = selectedTime.toLocaleString('en-US', options);
+      
+        // For example: "Monday, January 14, 2025 at 6:40 PM"
+        console.log(formattedTime); // For debugging or use where needed
+      
+        timeDateContainer.style.display = 'none';
+        showMissionDetails();
+      }
+      
+
+    function showMissionDetails() {
+      locationSummary.textContent = `Location: ${selectedLocation}`;
+      timeSummary.textContent = `Time: ${selectedTime}`;
+      messageSummary.textContent = `Please screenshot this and send this to Jeremy because he did not implement a backend`;
+      missionDetailsContainer.style.display = 'flex';
+    }
+
+    function selectTip(percentage) {
+      selectedTip = percentage;
+      console.log(`Selected tip: ${selectedTip}%`);
+      // Proceed with further actions, such as submitting the mission
+    }
+
+    function createRoses() {
+      for (let i = 0; i < 30; i++) {
+        const rose = document.createElement('div');
+        rose.classList.add('rose');
+        rose.textContent = '🌹';
+        rose.style.left = Math.random() * 100 + 'vw';
+        rose.style.animationDelay = Math.random() * 2 + 's';
+        rose.style.fontSize = Math.random() * 1.5 + 1 + 'em';
+        document.body.appendChild(rose);
+        rose.addEventListener('animationend', () => {
+          rose.remove();
+        });
+      }
+    }
+
+    function createBombs() {
+      for (let i = 0; i < 30; i++) {
+        const bomb = document.createElement('div');
+        bomb.classList.add('bomb');
+        bomb.textContent = '💣';
+        const x = Math.random() * 100 - 50;
+        const y = Math.random() * 100 - 50;
+        bomb.style.setProperty('--x', `${x}vw`);
+        bomb.style.setProperty('--y', `${y}vh`);
+        document.body.appendChild(bomb);
+        bomb.addEventListener('animationend', () => {
+          bomb.remove();
+        });
+      }
+    }
+  </script>
+</body>
+</html>
